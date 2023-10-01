@@ -24,7 +24,7 @@ class Characters_store():
     
     def clear_character_messages(self,chat_id):
         character = self.get_character(chat_id)
-        character.messages_array.arr = []
+        character.clear_context()
         #self.autosave()
     
     def set_character(self,chat_id,name):

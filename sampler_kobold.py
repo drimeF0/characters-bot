@@ -39,7 +39,7 @@ headers_get = {
 
 class kobold_sampler:
     
-    def __init__(self,models=None   ):
+    def __init__(self,models=None):
         self.params = {
         'n': 1,
         'max_context_length':2048,

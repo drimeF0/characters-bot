@@ -6,21 +6,34 @@ import json
 from telebot.asyncio_storage import StateMemoryStorage
 from telebot.asyncio_handler_backends import State, StatesGroup
 from telebot import asyncio_filters
+import logging
+
 
 from telebot.async_telebot import AsyncTeleBot
+import traceback
+
 
 from characters import Character,load_characters,CharacterFileManager
 from utils import split_command, FixedSizeArray
 from store import Characters_store 
-import random
 from config import *
 
 
 top_n_messages = FixedSizeArray(50)
 
 telebot_token = open("token.txt","r").read()
-bot = AsyncTeleBot(telebot_token,state_storage=StateMemoryStorage())
+class ExceptionHandler(telebot.ExceptionHandler):
+  def handle(self, exception):
+    print(traceback.format_exc())
 
+bot = AsyncTeleBot(telebot_token,state_storage=StateMemoryStorage(),exception_handler=ExceptionHandler())
+
+
+logger = telebot.logger
+telebot.logger.setLevel(logging.ERROR) # Outputs debug messages to console.
+
+
+# logger.error(exception)
 
 
 
@@ -97,7 +110,7 @@ async def getchars_command(message):
     st = f"""текущие персонажи:\n {stt} """
     msg = await bot.reply_to(message,st,  parse_mode="markdown")
     top_n_messages.append(msg)
-
+    
 
 @bot.message_handler(commands = ["setchar"])
 async def setchar_command(message):
@@ -132,6 +145,21 @@ async def clear_messages_command(message):
     characters.clear_character_messages(chat_id)
     await bot.reply_to(message,"готово.")
 
+@bot.message_handler(commands = ["random_restart"])
+async def random_restart(message):
+    chat_id = message.chat.id
+    character = characters.get_character(chat_id)
+    hello_message = character.random_hello_message()
+    msg = await bot.reply_to(message,hello_message)
+    top_n_messages.append(msg)
+
+@bot.message_handler(commands = ["imper"])
+async def imper(message):
+    chat_id = message.chat.id
+    character = characters.get_character(chat_id)
+    result = character.impersonate(message.from_user.username)
+    msg = await bot.reply_to(message,result)
+    top_n_messages.append(msg)
 
     
 #character creation processing
@@ -166,7 +194,7 @@ async def create_character(message):
     manager = CharacterFileManager()
     character = Character(name,desc,hello_message)
     characters.add_character(character,name)
-    manager.to_json(character=character,directory=CHARACTERS_PATH)
+    manager.save(character=character,directory=CHARACTERS_PATH)
     await bot.reply_to(message,f"персонаж {name} был создан!")
 
 #end of character creation processing

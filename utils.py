@@ -11,6 +11,9 @@ class FixedSizeArray:
         if len(self.arr) >= self.max_size:
             self.on_pop_func(self.arr.pop(0))
         self.arr.append(item)
+    
+    def clear(self):
+        self.arr.clear()
 
 def split_command(message):
     cmd = message.text.split(" ",1)

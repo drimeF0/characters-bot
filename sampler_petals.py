@@ -7,7 +7,7 @@ import torch
 translate_to_ru = GoogleTranslator(source='en', target='ru')
 translate_to_en = GoogleTranslator(source='ru', target='en')
 models = "petals-team/StableBeluga2"
-model = AutoDistributedModelForCausalLM.from_pretrained(models,dtype=torch.half)
+model = AutoDistributedModelForCausalLM.from_pretrained(models)
 tokenizer = AutoTokenizer.from_pretrained(models)
 
 pipe = TextGenerationPipeline(model=model,tokenizer=tokenizer)
